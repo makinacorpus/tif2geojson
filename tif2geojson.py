@@ -71,54 +71,56 @@ class Converter(object):
 
     def _parse_properties(self, entry):
         properties = {}
-        for prop in self.properties:
-            properties[prop] = None
-
-        main = entry.get('tif:DublinCore', {})
-
-        if 'title' in self.properties:
-            properties['title'] = main.get('dc:title', {}).get('#text')
-
-        if 'description' in self.properties:
-            for description in main.get('dc:description', []):
-                if description.get('@xml:lang') == self.lang:
-                    properties['description'] = description.get('#text')
-
-        if 'website' in self.properties:
-            contacts = entry.get('tif:Contacts', {}).get('tif:DetailContact')
-
-            if isinstance(contacts, list):
-                for contact in contacts:
-                    persons = contact.get('tif:Adresses', {}) \
-                                     .get('tif:DetailAdresse', {}) \
-                                     .get('tif:Personnes', {}) \
-                                     .get('tif:DetailPersonne')
-
-                    if isinstance(persons, dict):
-                        persons = [persons]
-
-                    if isinstance(persons, list):
-                        for person in persons:
-                            media = person.get('tif:MoyensCommunications', {}) \
-                                          .get('tif:DetailMoyenCom')
-                            if isinstance(media, list):
-                                for medium in media:
-                                    if medium['@type'] == CODE_WEBSITE:
-                                        properties['website'] = medium.get('tif:Coord')
-
-        if 'pictures' in self.properties:
-            pictures =  []
-            for multimedia in entry.get('tif:Multimedia', {}) \
-                                   .get('tif:DetailMultimedia'):
-                if multimedia['@type'] == CODE_IMAGE:
-                    picture = {
-                        'url': multimedia['tif:URL'],
-                        'copyright': multimedia['tif:Copyright']
-                    }
-                    pictures.append(picture)
-            properties['pictures'] =  pictures
-
+        for prop in SUPPORTED_PROPERTIES:
+            if prop in self.properties:
+                properties[prop] = getattr(self, '_parse_property_%s' % prop)(entry)
+            else:
+                properties[prop] = None
         return properties
+
+    def _parse_property_title(self, entry):
+        main = entry.get('tif:DublinCore', {})
+        return main.get('dc:title', {}).get('#text')
+
+    def _parse_property_description(self, entry):
+        main = entry.get('tif:DublinCore', {})
+        for description in main.get('dc:description', []):
+            if description.get('@xml:lang') == self.lang:
+                return description.get('#text')
+
+    def _parse_property_website(self, entry):
+        contacts = entry.get('tif:Contacts', {}).get('tif:DetailContact')
+
+        if isinstance(contacts, list):
+            for contact in contacts:
+                persons = contact.get('tif:Adresses', {}) \
+                                 .get('tif:DetailAdresse', {}) \
+                                 .get('tif:Personnes', {}) \
+                                 .get('tif:DetailPersonne')
+
+                if isinstance(persons, dict):
+                    persons = [persons]
+
+                if isinstance(persons, list):
+                    for person in persons:
+                        media = person.get('tif:MoyensCommunications', {}) \
+                                      .get('tif:DetailMoyenCom')
+                        if isinstance(media, list):
+                            for medium in media:
+                                if medium['@type'] == CODE_WEBSITE:
+                                    return medium.get('tif:Coord')
+
+    def _parse_property_pictures(self, entry):
+        pictures =  []
+        for multimedia in entry.get('tif:Multimedia', {}) \
+                               .get('tif:DetailMultimedia'):
+            if multimedia['@type'] == CODE_IMAGE:
+                picture = {
+                    'url': multimedia['tif:URL'],
+                    'copyright': multimedia['tif:Copyright']
+                }
+                pictures.append(picture)
+        return pictures
 
 
 tif2geojson = Converter()
