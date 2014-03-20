@@ -28,7 +28,7 @@ class TestTif2geojson(unittest.TestCase):
         self.assertTrue(isinstance(geojson, dict))
 
     def test_converter_returns_dict_when_empty(self):
-        geojson = tif2geojson(self.fullsample)
+        geojson = tif2geojson(self.emptysample)
         self.assertTrue(isinstance(geojson, dict))
 
     def test_provides_features_collection(self):
@@ -38,6 +38,11 @@ class TestTif2geojson(unittest.TestCase):
     def test_provides_entries_as_features_list(self):
         geojson = tif2geojson(self.fullsample)
         self.assertTrue(isinstance(geojson['features'], list))
+
+    def test_entries_are_feature(self):
+        geojson = tif2geojson(self.fullsample)
+        feature = geojson['features'][0]
+        self.assertEqual(feature['type'], 'Feature')
 
     def tearDown(self):
         pass
