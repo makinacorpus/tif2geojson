@@ -44,6 +44,12 @@ class TestTif2geojson(unittest.TestCase):
         feature = geojson['features'][0]
         self.assertEqual(feature['type'], 'Feature')
 
+    def test_entries_have_point_geometries(self):
+        geojson = tif2geojson(self.fullsample)
+        feature = geojson['features'][0]
+        geometry = feature['geometry']
+        self.assertEqual(geometry['type'], 'Point')
+
     def tearDown(self):
         pass
 
