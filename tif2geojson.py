@@ -67,6 +67,12 @@ class Converter(object):
         properties = {}
         for prop in self.properties:
             properties[prop] = None
+
+        main = entry.get('tif:DublinCore', {})
+
+        if 'title' in self.properties:
+            properties['title'] = main.get('dc:title', {}).get('#text')
+
         return properties
 
 
