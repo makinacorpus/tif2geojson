@@ -1,19 +1,27 @@
 from xml.parsers.expat import ExpatError
-from collections import OrderedDict
 
 import geojson
 import xmltodict
 
 
+SUPPORTED_PROPERTIES = ['title', 'description', 'pictures']
+
+
 class Converter(object):
-    def __call__(self, content):
-        features = self._parse_content(content)
+    def __init__(self):
+        self.content = ''
+        self.properties = None
+
+    def __call__(self, content, properties=None):
+        self.content = content
+        self.properties = properties if properties else SUPPORTED_PROPERTIES
+        features = self._parse_content()
         result = geojson.FeatureCollection(features)
         return result
 
-    def _parse_content(self, content):
+    def _parse_content(self):
         try:
-            parsed = xmltodict.parse(content)
+            parsed = xmltodict.parse(self.content)
         except ExpatError:
             parsed = dict()
         entries = parsed.get('listeOI', {}).get('OIs', {}).get('tif:OI', [])
@@ -25,7 +33,8 @@ class Converter(object):
 
     def _parse_entry(self, entry):
         geometry = self._parse_location(entry)
-        return geojson.Feature(geometry=geometry)
+        properties = self._parse_properties(entry)
+        return geojson.Feature(geometry=geometry, properties=properties)
 
     def _parse_location(self, entry):
         """
@@ -53,6 +62,12 @@ class Converter(object):
             return geojson.Point(coords)
 
         return None
+
+    def _parse_properties(self, entry):
+        properties = {}
+        for prop in self.properties:
+            properties[prop] = None
+        return properties
 
 
 tif2geojson = Converter()

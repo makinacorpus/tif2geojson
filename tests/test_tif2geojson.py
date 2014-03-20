@@ -62,6 +62,17 @@ class TestTif2geojson(unittest.TestCase):
         geometry = geojson['features'][1]['geometry']
         self.assertEqual(geometry, None)
 
+    def test_entries_have_properties_as_dict(self):
+        geojson = tif2geojson(self.fullsample)
+        feature = geojson['features'][0]
+        self.assertTrue(isinstance(feature['properties'], dict))
+
+    def test_entries_have_defaut_properties_as_none(self):
+        geojson = tif2geojson(self.fullsample)
+        properties = geojson['features'][0]['properties']
+        self.assertEqual(sorted(properties.keys()),
+                         ['description', 'pictures', 'title'])
+
     def tearDown(self):
         pass
 
