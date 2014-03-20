@@ -5,7 +5,8 @@ import xmltodict
 
 
 DEFAULT_LANGUAGE = 'EN'
-SUPPORTED_PROPERTIES = ['title', 'description', 'pictures', 'website']
+SUPPORTED_PROPERTIES = ['title', 'description', 'category',
+                        'pictures', 'website']
 
 CODE_WEBSITE = '04.02.05'
 CODE_IMAGE = '03.01.01'
@@ -78,6 +79,15 @@ class Converter(object):
             if self.properties is None or prop in self.properties:
                 properties[prop] = getattr(self, '_parse_property_%s' % prop)(entry)
         return properties
+
+    def _parse_property_category(self, entry):
+        main = entry.get('tif:DublinCore', {})
+        category = main.get('tif:Classification', {})
+        return {
+            'id': category.get('@code'),
+            'label': category.get('#text')
+        }
+        return main.get('dc:title', {}).get('#text')
 
     def _parse_property_title(self, entry):
         main = entry.get('tif:DublinCore', {})

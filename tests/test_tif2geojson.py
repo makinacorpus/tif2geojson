@@ -10,7 +10,7 @@ Tests for `tif2geojson` module.
 import os
 import unittest
 
-from tif2geojson import tif2geojson
+from tif2geojson import tif2geojson, SUPPORTED_PROPERTIES
 
 
 here = os.path.dirname(__file__)
@@ -76,7 +76,7 @@ class TestTif2geojson(unittest.TestCase):
         geojson = tif2geojson(self.fullsample)
         properties = geojson['features'][0]['properties']
         self.assertEqual(sorted(properties.keys()),
-                         ['description', 'pictures', 'title', 'website'])
+                         sorted(SUPPORTED_PROPERTIES))
 
     def test_entries_properties_can_be_specified(self):
         geojson = tif2geojson(self.fullsample, properties=['title'])
@@ -88,6 +88,12 @@ class TestTif2geojson(unittest.TestCase):
         geojson = tif2geojson(self.fullsample, properties=['age'])
         properties = geojson['features'][0]['properties']
         self.assertNotIn('age', properties)
+
+    def test_entries_have_category(self):
+        geojson = tif2geojson(self.fullsample)
+        category = geojson['features'][0]['properties']['category']
+        self.assertEqual(category['id'], u'02.01.05')
+        self.assertEqual(category['label'], u'Hôtellerie')
 
     def test_entries_have_title(self):
         geojson = tif2geojson(self.fullsample)
