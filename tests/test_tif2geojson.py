@@ -44,6 +44,11 @@ class TestTif2geojson(unittest.TestCase):
         feature = geojson['features'][0]
         self.assertEqual(feature['type'], 'Feature')
 
+    def test_entries_have_id(self):
+        geojson = tif2geojson(self.fullsample)
+        id_ = geojson['features'][0]['id']
+        self.assertEqual(id_, u'TFO17142937971')
+
     def test_entries_have_point_geometries(self):
         geojson = tif2geojson(self.fullsample)
         feature = geojson['features'][0]

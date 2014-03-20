@@ -38,9 +38,12 @@ class Converter(object):
         return features
 
     def _parse_entry(self, entry):
+        id_ = entry.get('tif:DublinCore', {}).get('dc:identifier')
         geometry = self._parse_location(entry)
         properties = self._parse_properties(entry)
-        return geojson.Feature(geometry=geometry, properties=properties)
+        return geojson.Feature(id=id_,
+                               geometry=geometry,
+                               properties=properties)
 
     def _parse_location(self, entry):
         """
