@@ -4,6 +4,7 @@ import geojson
 import xmltodict
 
 
+DEFAULT_LANGUAGE = 'EN'
 SUPPORTED_PROPERTIES = ['title', 'description', 'pictures']
 
 
@@ -11,10 +12,12 @@ class Converter(object):
     def __init__(self):
         self.content = ''
         self.properties = None
+        self.lang = DEFAULT_LANGUAGE
 
-    def __call__(self, content, properties=None):
+    def __call__(self, content, properties=None, lang=None):
         self.content = content
         self.properties = properties if properties else SUPPORTED_PROPERTIES
+        self.lang = lang if lang else self.lang
         features = self._parse_content()
         result = geojson.FeatureCollection(features)
         return result
@@ -72,6 +75,11 @@ class Converter(object):
 
         if 'title' in self.properties:
             properties['title'] = main.get('dc:title', {}).get('#text')
+
+        if 'description' in self.properties:
+            for description in main.get('dc:description', []):
+                if description.get('@xml:lang') == self.lang:
+                    properties['description'] = description.get('#text')
 
         return properties
 

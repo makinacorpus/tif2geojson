@@ -78,6 +78,12 @@ class TestTif2geojson(unittest.TestCase):
         properties = geojson['features'][0]['properties']
         self.assertEqual(properties['title'], u'Le Belle Rive')
 
+    def test_entries_have_description(self):
+        geojson = tif2geojson(self.fullsample)
+        properties = geojson['features'][0]['properties']
+        description = "Comfortable rooms, laundry service, swimming pool, tennis, closed garage, large car park."
+        self.assertEqual(properties['description'], description)
+
 
     def tearDown(self):
         pass
