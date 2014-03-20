@@ -5,7 +5,9 @@ import xmltodict
 
 
 DEFAULT_LANGUAGE = 'EN'
-SUPPORTED_PROPERTIES = ['title', 'description', 'pictures']
+SUPPORTED_PROPERTIES = ['title', 'description', 'pictures', 'website']
+
+CODE_WEBSITE = '04.02.05'
 
 
 class Converter(object):
@@ -80,6 +82,28 @@ class Converter(object):
             for description in main.get('dc:description', []):
                 if description.get('@xml:lang') == self.lang:
                     properties['description'] = description.get('#text')
+
+        if 'website' in self.properties:
+            contacts = entry.get('tif:Contacts', {}).get('tif:DetailContact')
+
+            if isinstance(contacts, list):
+                for contact in contacts:
+                    persons = contact.get('tif:Adresses', {}) \
+                                     .get('tif:DetailAdresse', {}) \
+                                     .get('tif:Personnes', {}) \
+                                     .get('tif:DetailPersonne')
+
+                    if isinstance(persons, dict):
+                        persons = [persons]
+
+                    if isinstance(persons, list):
+                        for person in persons:
+                            media = person.get('tif:MoyensCommunications', {}) \
+                                          .get('tif:DetailMoyenCom')
+                            if isinstance(media, list):
+                                for medium in media:
+                                    if medium['@type'] == CODE_WEBSITE:
+                                        properties['website'] = medium.get('tif:Coord')
 
         return properties
 
