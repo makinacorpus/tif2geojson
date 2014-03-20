@@ -1,4 +1,5 @@
 from xml.parsers.expat import ExpatError
+from collections import OrderedDict
 
 import geojson
 import xmltodict
@@ -23,8 +24,35 @@ class Converter(object):
         return features
 
     def _parse_entry(self, entry):
-        geometry = geojson.Point()
+        geometry = self._parse_location(entry)
         return geojson.Feature(geometry=geometry)
+
+    def _parse_location(self, entry):
+        """
+        Return the **first** location as `geojson.Point`.
+        """
+        locations = entry.get('tif:Geolocalisations')
+
+        if not isinstance(locations, list):
+            return None
+
+        coords = []
+        for location in locations:
+            coords = location.get('tif:DetailGeolocalisation', {}) \
+                             .get('tif:Zone', {}) \
+                             .get('tif:Points', {}) \
+                             .get('tif:DetailPoint', {}) \
+                             .get('tif:Coordonnees', {}) \
+                             .get('tif:DetailCoordonnees', {})
+            if 'tif:Latitude' not in coords:
+                continue
+            lat = float(coords['tif:Latitude'])
+            lng = float(coords['tif:Longitude'])
+            altitude = float(coords['tif:Altitude'])
+            coords = [lng, lat, altitude]
+            return geojson.Point(coords)
+
+        return None
 
 
 tif2geojson = Converter()
