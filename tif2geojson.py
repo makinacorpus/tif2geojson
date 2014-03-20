@@ -8,6 +8,7 @@ DEFAULT_LANGUAGE = 'EN'
 SUPPORTED_PROPERTIES = ['title', 'description', 'pictures', 'website']
 
 CODE_WEBSITE = '04.02.05'
+CODE_IMAGE = '03.01.01'
 
 
 class Converter(object):
@@ -104,6 +105,18 @@ class Converter(object):
                                 for medium in media:
                                     if medium['@type'] == CODE_WEBSITE:
                                         properties['website'] = medium.get('tif:Coord')
+
+        if 'pictures' in self.properties:
+            pictures =  []
+            for multimedia in entry.get('tif:Multimedia', {}) \
+                                   .get('tif:DetailMultimedia'):
+                if multimedia['@type'] == CODE_IMAGE:
+                    picture = {
+                        'url': multimedia['tif:URL'],
+                        'copyright': multimedia['tif:Copyright']
+                    }
+                    pictures.append(picture)
+            properties['pictures'] =  pictures
 
         return properties
 

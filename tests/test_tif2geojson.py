@@ -95,6 +95,17 @@ class TestTif2geojson(unittest.TestCase):
         properties = geojson['features'][0]['properties']
         self.assertEqual(properties['website'], u'http://www.lebellerive.fr/')
 
+    def test_entries_have_pictures_as_list(self):
+        geojson = tif2geojson(self.fullsample)
+        properties = geojson['features'][0]['properties']
+        self.assertTrue(isinstance(properties['pictures'], list))
+
+    def test_entries_pictures_have_url_and_credits(self):
+        geojson = tif2geojson(self.fullsample)
+        picture = geojson['features'][0]['properties']['pictures'][0]
+        self.assertEqual(picture['url'], u'http://www.caravelis.com/xml/oi/TFO17142937971/TFO17142937971-14a/medias/jpg/vueg__n__rale.jpg')
+        self.assertEqual(picture['copyright'], u'HÔTEL LE BELLE RIVE')
+
     def tearDown(self):
         pass
 
