@@ -19,7 +19,7 @@ class Converter(object):
 
     def __call__(self, content, properties=None, lang=None):
         self.content = content
-        self.properties = properties if properties else SUPPORTED_PROPERTIES
+        self.properties = properties
         self.lang = lang if lang else self.lang
         features = self._parse_content()
         result = geojson.FeatureCollection(features)
@@ -72,10 +72,8 @@ class Converter(object):
     def _parse_properties(self, entry):
         properties = {}
         for prop in SUPPORTED_PROPERTIES:
-            if prop in self.properties:
+            if self.properties is None or prop in self.properties:
                 properties[prop] = getattr(self, '_parse_property_%s' % prop)(entry)
-            else:
-                properties[prop] = None
         return properties
 
     def _parse_property_title(self, entry):

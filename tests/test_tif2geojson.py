@@ -67,11 +67,22 @@ class TestTif2geojson(unittest.TestCase):
         feature = geojson['features'][0]
         self.assertTrue(isinstance(feature['properties'], dict))
 
-    def test_entries_have_defaut_properties_as_none(self):
+    def test_entries_have_defaut_properties(self):
         geojson = tif2geojson(self.fullsample)
         properties = geojson['features'][0]['properties']
         self.assertEqual(sorted(properties.keys()),
                          ['description', 'pictures', 'title', 'website'])
+
+    def test_entries_properties_can_be_specified(self):
+        geojson = tif2geojson(self.fullsample, properties=['title'])
+        properties = geojson['features'][0]['properties']
+        self.assertEqual(len(properties.keys()), 1)
+        self.assertIn('title', properties)
+
+    def test_entries_unknown_properties_are_ignored(self):
+        geojson = tif2geojson(self.fullsample, properties=['age'])
+        properties = geojson['features'][0]['properties']
+        self.assertNotIn('age', properties)
 
     def test_entries_have_title(self):
         geojson = tif2geojson(self.fullsample)
