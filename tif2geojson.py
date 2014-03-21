@@ -31,7 +31,7 @@ class Converter(object):
             parsed = xmltodict.parse(self.content)
         except ExpatError:
             parsed = dict()
-        entries = parsed.get('listeOI', {}).get('OIs', {}).get('tif:OI', [])
+        entries = _deep_value(parsed, 'listeOI', 'OIs', 'tif:OI')
         features = []
         for entry in entries:
             feature = self._parse_entry(entry)
@@ -39,7 +39,7 @@ class Converter(object):
         return features
 
     def _parse_entry(self, entry):
-        id_ = entry.get('tif:DublinCore', {}).get('dc:identifier')
+        id_ = _deep_value(entry, 'tif:DublinCore', 'dc:identifier')
         geometry = self._parse_location(entry)
         properties = self._parse_properties(entry)
         return geojson.Feature(id=id_,
@@ -57,12 +57,12 @@ class Converter(object):
 
         coords = []
         for location in locations:
-            coords = location.get('tif:DetailGeolocalisation', {}) \
-                             .get('tif:Zone', {}) \
-                             .get('tif:Points', {}) \
-                             .get('tif:DetailPoint', {}) \
-                             .get('tif:Coordonnees', {}) \
-                             .get('tif:DetailCoordonnees', {})
+            coords = _deep_value(location, 'tif:DetailGeolocalisation',
+                                           'tif:Zone',
+                                           'tif:Points',
+                                           'tif:DetailPoint',
+                                           'tif:Coordonnees',
+                                           'tif:DetailCoordonnees')
             if 'tif:Latitude' not in coords:
                 continue
             lat = float(coords['tif:Latitude'])
@@ -81,57 +81,65 @@ class Converter(object):
         return properties
 
     def _parse_property_category(self, entry):
-        main = entry.get('tif:DublinCore', {})
-        category = main.get('tif:Classification', {})
+        category = _deep_value(entry, 'tif:DublinCore', 'tif:Classification')
         return {
             'id': category.get('@code'),
             'label': category.get('#text')
         }
-        return main.get('dc:title', {}).get('#text')
 
     def _parse_property_title(self, entry):
-        main = entry.get('tif:DublinCore', {})
-        return main.get('dc:title', {}).get('#text')
+        return _deep_value(entry, 'tif:DublinCore', 'dc:title').get('#text')
 
     def _parse_property_description(self, entry):
-        main = entry.get('tif:DublinCore', {})
-        for description in main.get('dc:description', []):
+        descriptions = _deep_value(entry, 'tif:DublinCore', 'dc:description',
+                                   default=[])
+        for description in descriptions:
             if description.get('@xml:lang') == self.lang:
                 return description.get('#text')
 
     def _parse_property_website(self, entry):
-        contacts = entry.get('tif:Contacts', {}).get('tif:DetailContact')
+        contacts = _deep_value(entry, 'tif:Contacts', 'tif:DetailContact')
+        for contact in contacts:
+            persons = _deep_value(contact, 'tif:Adresses',
+                                           'tif:DetailAdresse',
+                                           'tif:Personnes',
+                                           'tif:DetailPersonne')
+            if isinstance(persons, dict):
+                persons = [persons]
 
-        if isinstance(contacts, list):
-            for contact in contacts:
-                persons = contact.get('tif:Adresses', {}) \
-                                 .get('tif:DetailAdresse', {}) \
-                                 .get('tif:Personnes', {}) \
-                                 .get('tif:DetailPersonne')
-
-                if isinstance(persons, dict):
-                    persons = [persons]
-
-                if isinstance(persons, list):
-                    for person in persons:
-                        media = person.get('tif:MoyensCommunications', {}) \
-                                      .get('tif:DetailMoyenCom')
-                        if isinstance(media, list):
-                            for medium in media:
-                                if medium['@type'] == CODE_WEBSITE:
-                                    return medium.get('tif:Coord')
+            if isinstance(persons, list):
+                for person in persons:
+                    media = _deep_value(person, 'tif:MoyensCommunications',
+                                                'tif:DetailMoyenCom')
+                    if isinstance(media, list):
+                        for medium in media:
+                            if medium['@type'] == CODE_WEBSITE:
+                                return medium.get('tif:Coord')
 
     def _parse_property_pictures(self, entry):
+        multimedia = _deep_value(entry, 'tif:Multimedia',
+                                        'tif:DetailMultimedia')
         pictures =  []
-        for multimedia in entry.get('tif:Multimedia', {}) \
-                               .get('tif:DetailMultimedia'):
-            if multimedia['@type'] == CODE_IMAGE:
+        for multimedium in multimedia:
+            if multimedium['@type'] == CODE_IMAGE:
                 picture = {
-                    'url': multimedia['tif:URL'],
-                    'copyright': multimedia['tif:Copyright']
+                    'url': multimedium['tif:URL'],
+                    'copyright': multimedium['tif:Copyright']
                 }
                 pictures.append(picture)
         return pictures
+
+
+def _deep_value(*args, **kwargs):
+    """ Drills down into tree using the keys
+    """
+    node, keys = args[0], args[1:]
+    for key in keys:
+        node = node.get(key, {})
+    default = kwargs.get('default', {})
+    if node in ({}, [], None):
+        node = default
+    return node
 
 
 tif2geojson = Converter()
