@@ -117,6 +117,11 @@ class TestTif2geojson(unittest.TestCase):
         properties = geojson['features'][0]['properties']
         self.assertEqual(properties['website'], u'www.lebellerive.fr/')
 
+    def test_entries_have_phone(self):
+        geojson = tif2geojson(self.fullsample)
+        properties = geojson['features'][0]['properties']
+        self.assertEqual(properties['phone'], u'+330565297390')
+
     def test_entries_have_pictures_as_list(self):
         geojson = tif2geojson(self.fullsample)
         properties = geojson['features'][0]['properties']

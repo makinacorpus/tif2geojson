@@ -6,10 +6,11 @@ import xmltodict
 
 DEFAULT_LANGUAGE = 'EN'
 SUPPORTED_PROPERTIES = ['title', 'description', 'category',
-                        'pictures', 'website']
+                        'pictures', 'website', 'phone']
 
 CODE_WEBSITE = '04.02.05'
 CODE_IMAGE = '03.01.01'
+CODE_PHONE = '04.02.01'
 
 
 class Converter(object):
@@ -97,7 +98,7 @@ class Converter(object):
             if description.get('@xml:lang') == self.lang:
                 return description.get('#text')
 
-    def _parse_property_website(self, entry):
+    def _parse_communication_media(self, entry):
         contacts = _deep_value(entry, 'tif:Contacts', 'tif:DetailContact')
         for contact in contacts:
             persons = _deep_value(contact, 'tif:Adresses',
@@ -111,10 +112,20 @@ class Converter(object):
                 for person in persons:
                     media = _deep_value(person, 'tif:MoyensCommunications',
                                                 'tif:DetailMoyenCom')
-                    if isinstance(media, list):
-                        for medium in media:
-                            if medium['@type'] == CODE_WEBSITE:
-                                return medium.get('tif:Coord')
+                    return media
+        return []
+
+    def _parse_property_website(self, entry):
+        media = self._parse_communication_media(entry)
+        for medium in media:
+            if medium['@type'] == CODE_WEBSITE:
+                return medium.get('tif:Coord')
+
+    def _parse_property_phone(self, entry):
+        media = self._parse_communication_media(entry)
+        for medium in media:
+            if medium['@type'] == CODE_PHONE:
+                return medium.get('tif:Coord')
 
     def _parse_property_pictures(self, entry):
         multimedia = _deep_value(entry, 'tif:Multimedia',
