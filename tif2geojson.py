@@ -11,6 +11,7 @@ SUPPORTED_PROPERTIES = ['title', 'description', 'category',
 CODE_WEBSITE = '04.02.05'
 CODE_IMAGE = '03.01.01'
 CODE_PHONE = '04.02.01'
+CODE_MAIN_CONTACT = '04.03.13'
 
 
 class Converter(object):
@@ -78,7 +79,8 @@ class Converter(object):
         properties = {}
         for prop in SUPPORTED_PROPERTIES:
             if self.properties is None or prop in self.properties:
-                properties[prop] = getattr(self, '_parse_property_%s' % prop)(entry)
+                method = getattr(self, '_parse_property_%s' % prop)
+                properties[prop] = method(entry)
         return properties
 
     def _parse_property_category(self, entry):
@@ -98,9 +100,12 @@ class Converter(object):
             if description.get('@xml:lang') == self.lang:
                 return description.get('#text')
 
-    def _parse_communication_media(self, entry):
+    def _parse_communication_media(self, entry, contact_type=None):
         contacts = _deep_value(entry, 'tif:Contacts', 'tif:DetailContact')
         for contact in contacts:
+            if contact and contact.get("@type") != contact_type:
+                continue
+
             persons = _deep_value(contact, 'tif:Adresses',
                                            'tif:DetailAdresse',
                                            'tif:Personnes',
@@ -116,13 +121,15 @@ class Converter(object):
         return []
 
     def _parse_property_website(self, entry):
-        media = self._parse_communication_media(entry)
+        media = self._parse_communication_media(entry,
+                                                contact_type=CODE_MAIN_CONTACT)
         for medium in media:
             if medium['@type'] == CODE_WEBSITE:
                 return medium.get('tif:Coord')
 
     def _parse_property_phone(self, entry):
-        media = self._parse_communication_media(entry)
+        media = self._parse_communication_media(entry,
+                                                contact_type=CODE_MAIN_CONTACT)
         for medium in media:
             if medium['@type'] == CODE_PHONE:
                 return medium.get('tif:Coord')
