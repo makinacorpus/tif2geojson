@@ -82,12 +82,12 @@ class TestTif2geojson(unittest.TestCase):
         geojson = tif2geojson(self.fullsample, properties=['title'])
         properties = geojson['features'][0]['properties']
         self.assertEqual(len(properties.keys()), 1)
-        self.assertIn('title', properties)
+        self.assertTrue('title' in properties)
 
     def test_entries_unknown_properties_are_ignored(self):
         geojson = tif2geojson(self.fullsample, properties=['age'])
         properties = geojson['features'][0]['properties']
-        self.assertNotIn('age', properties)
+        self.assertFalse('age' in properties)
 
     def test_entries_have_category(self):
         geojson = tif2geojson(self.fullsample)
