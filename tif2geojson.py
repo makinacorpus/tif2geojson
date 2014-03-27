@@ -162,3 +162,13 @@ def _deep_value_list(*args, **kwargs):
 
 
 tif2geojson = Converter()
+
+
+if __name__ == '__main__':
+    import sys
+    import fileinput
+    import json
+
+    content = ''.join(fileinput.input())
+    result = tif2geojson(content)
+    sys.stdout.write(json.dumps(result) + "\n")
