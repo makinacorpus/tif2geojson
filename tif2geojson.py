@@ -33,7 +33,7 @@ class Converter(object):
             parsed = xmltodict.parse(self.content)
         except ExpatError:
             parsed = dict()
-        entries = _deep_value(parsed, 'listeOI', 'OIs', 'tif:OI')
+        entries = _deep_value_list(parsed, 'listeOI', 'OIs', 'tif:OI')
         features = []
         for entry in entries:
             feature = self._parse_entry(entry)
@@ -52,11 +52,7 @@ class Converter(object):
         """
         Return the **first** location as `geojson.Point`.
         """
-        locations = entry.get('tif:Geolocalisations')
-
-        if not isinstance(locations, list):
-            return None
-
+        locations = _deep_value_list(entry, 'tif:Geolocalisations')
         coords = []
         for location in locations:
             coords = _deep_value(location, 'tif:DetailGeolocalisation',
@@ -94,8 +90,8 @@ class Converter(object):
         return _deep_value(entry, 'tif:DublinCore', 'dc:title').get('#text')
 
     def _parse_property_description(self, entry):
-        descriptions = _deep_value(entry, 'tif:DublinCore', 'dc:description',
-                                   default=[])
+        descriptions = _deep_value_list(entry, 'tif:DublinCore', 'dc:description',
+                                        default=[])
         for description in descriptions:
             if description.get('@xml:lang') == self.lang:
                 return description.get('#text')
@@ -107,13 +103,10 @@ class Converter(object):
             if contact and contact.get("@type") != contact_type:
                 continue
 
-            persons = _deep_value(contact, 'tif:Adresses',
-                                           'tif:DetailAdresse',
-                                           'tif:Personnes',
-                                           'tif:DetailPersonne')
-            if isinstance(persons, dict):
-                persons = [persons]
-
+            persons = _deep_value_list(contact, 'tif:Adresses',
+                                                'tif:DetailAdresse',
+                                                'tif:Personnes',
+                                                'tif:DetailPersonne')
             for person in persons:
                 media = _deep_value(person, 'tif:MoyensCommunications',
                                             'tif:DetailMoyenCom')
@@ -135,8 +128,8 @@ class Converter(object):
                 return medium.get('tif:Coord')
 
     def _parse_property_pictures(self, entry):
-        multimedia = _deep_value(entry, 'tif:Multimedia',
-                                        'tif:DetailMultimedia')
+        multimedia = _deep_value_list(entry, 'tif:Multimedia',
+                                             'tif:DetailMultimedia')
         pictures =  []
         for multimedium in multimedia:
             if multimedium['@type'] == CODE_IMAGE:
@@ -162,7 +155,7 @@ def _deep_value(*args, **kwargs):
 
 def _deep_value_list(*args, **kwargs):
     val = _deep_value(*args, **kwargs)
-    if isinstance(val, dict):
+    if val and not isinstance(val, list):
         val = [val]
     return val
 
