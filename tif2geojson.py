@@ -101,7 +101,8 @@ class Converter(object):
                 return description.get('#text')
 
     def _parse_communication_media(self, entry, contact_type=None):
-        contacts = _deep_value(entry, 'tif:Contacts', 'tif:DetailContact')
+        contacts = _deep_value_list(entry, 'tif:Contacts', 'tif:DetailContact')
+
         for contact in contacts:
             if contact and contact.get("@type") != contact_type:
                 continue
@@ -157,6 +158,13 @@ def _deep_value(*args, **kwargs):
     if node in ({}, [], None):
         node = default
     return node
+
+
+def _deep_value_list(*args, **kwargs):
+    val = _deep_value(*args, **kwargs)
+    if isinstance(val, dict):
+        val = [val]
+    return val
 
 
 tif2geojson = Converter()
