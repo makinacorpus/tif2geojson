@@ -93,7 +93,8 @@ class Converter(object):
         descriptions = _deep_value_list(entry, 'tif:DublinCore', 'dc:description',
                                         default=[])
         for description in descriptions:
-            if description.get('@xml:lang').lower() == self.lang.lower():
+            desc_language = description.get('@xml:lang', '').lower()
+            if self.lang.lower().startswith(desc_language):
                 return description.get('#text')
 
     def _parse_communication_media(self, entry, contact_type=None):

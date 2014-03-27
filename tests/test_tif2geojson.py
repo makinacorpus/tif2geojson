@@ -118,6 +118,12 @@ class TestTif2geojson(unittest.TestCase):
         description = u"Chambres confortables, service buanderie, piscine, tennis, garage fermé, grand parking, Wifi.<br/>"
         self.assertEqual(properties['description'], description)
 
+    def test_entries_have_description_in_specified_iso_language(self):
+        geojson = tif2geojson(self.fullsample, lang='fr-FR')
+        properties = geojson['features'][0]['properties']
+        description = u"Chambres confortables, service buanderie, piscine, tennis, garage fermé, grand parking, Wifi.<br/>"
+        self.assertEqual(properties['description'], description)
+
     def test_entries_have_website(self):
         geojson = tif2geojson(self.fullsample)
         properties = geojson['features'][0]['properties']
