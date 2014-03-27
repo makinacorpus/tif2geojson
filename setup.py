@@ -31,6 +31,8 @@ setup(
     package_dir={'tif2geojson': '.'},
     include_package_data=True,
     install_requires=[
+        'geojson',
+        'xmltodict',
     ],
     license="BSD",
     zip_safe=False,
