@@ -113,11 +113,10 @@ class Converter(object):
             if isinstance(persons, dict):
                 persons = [persons]
 
-            if isinstance(persons, list):
-                for person in persons:
-                    media = _deep_value(person, 'tif:MoyensCommunications',
-                                                'tif:DetailMoyenCom')
-                    return media
+            for person in persons:
+                media = _deep_value(person, 'tif:MoyensCommunications',
+                                            'tif:DetailMoyenCom')
+                return media
         return []
 
     def _parse_property_website(self, entry):
