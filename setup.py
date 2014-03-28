@@ -28,6 +28,9 @@ setup(
     packages=[
         'tif2geojson',
     ],
+    scripts=[
+        'tif2geojson.py'
+    ],
     package_dir={'tif2geojson': '.'},
     include_package_data=True,
     install_requires=[
