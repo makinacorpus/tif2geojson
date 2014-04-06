@@ -6,8 +6,7 @@ History
 0.1.1 (unreleased)
 ++++++++++++++++++
 
-- Nothing changed yet.
-
+* Fix module packaging
 
 0.1.0 (2014-03-28)
 ++++++++++++++++++

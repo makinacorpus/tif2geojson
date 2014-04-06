@@ -25,13 +25,10 @@ setup(
     author='Makina Corpus',
     author_email='mathieu.leplatre@makina-corpus.com',
     url='https://github.com/makinacorpus/tif2geojson',
-    packages=[
-        'tif2geojson',
-    ],
     scripts=[
         'tif2geojson.py'
     ],
-    package_dir={'tif2geojson': '.'},
+    py_modules=['tif2geojson'],
     include_package_data=True,
     install_requires=[
         'geojson',
