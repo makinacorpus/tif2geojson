@@ -108,14 +108,17 @@ class Converter(object):
             if contact and contact.get("@type") != contact_type:
                 continue
 
-            persons = _deep_value_list(contact, 'tif:Adresses',
-                                                'tif:DetailAdresse',
-                                                'tif:Personnes',
-                                                'tif:DetailPersonne')
-            for person in persons:
-                media = _deep_value(person, 'tif:MoyensCommunications',
-                                            'tif:DetailMoyenCom')
-                return media
+            adresses = _deep_value_list(contact, 'tif:Adresses',
+                                                 'tif:DetailAdresse')
+            for address in adresses:
+                if address:
+                    persons = _deep_value_list(address,
+                                              'tif:Personnes',
+                                              'tif:DetailPersonne')
+                    for person in persons:
+                        media = _deep_value(person, 'tif:MoyensCommunications',
+                                                    'tif:DetailMoyenCom')
+                        return media
         return []
 
     def _parse_property_website(self, entry):

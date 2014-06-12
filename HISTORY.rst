@@ -8,6 +8,7 @@ History
 
 * Fix error when dc:title tags have no attribute
 * Fix error when image has no copyright
+* Fix error when several adresses for one entry
 
 0.1.1 (2014-04-06)
 ++++++++++++++++++

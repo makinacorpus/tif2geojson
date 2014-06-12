@@ -175,6 +175,8 @@
 
       <tif:Adresses>
         <tif:DetailAdresse>
+        </tif:DetailAdresse>
+        <tif:DetailAdresse>
           <tif:Adr1>4 rue Roc du Pont</tif:Adr1>
 
 
