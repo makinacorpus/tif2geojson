@@ -3,7 +3,7 @@
 History
 -------
 
-0.1.2 (unreleased)
+0.1.2 (2014-06-12)
 ++++++++++++++++++
 
 * Fix error when dc:title tags have no attribute
