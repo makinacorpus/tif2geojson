@@ -138,9 +138,12 @@ class Converter(object):
         pictures =  []
         for multimedium in multimedia:
             if multimedium['@type'] == CODE_IMAGE:
+                url = multimedium.get('tif:URL')
+                if not url:
+                    continue
                 picture = {
-                    'url': multimedium['tif:URL'],
-                    'copyright': multimedium['tif:Copyright']
+                    'url': url,
+                    'copyright': multimedium.get('tif:Copyright', '')
                 }
                 pictures.append(picture)
         return pictures

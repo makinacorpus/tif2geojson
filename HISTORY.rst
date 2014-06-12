@@ -7,7 +7,7 @@ History
 ++++++++++++++++++
 
 * Fix error when dc:title tags have no attribute
-
+* Fix error when image has no copyright
 
 0.1.1 (2014-04-06)
 ++++++++++++++++++
