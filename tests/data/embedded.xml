@@ -2,7 +2,7 @@
 <listeOI xmlns="http://www.caravelis.com/webservice/data" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.caravelis.com/webservice/data http://www.caravelis.com/webservice/data/listeOI.xsd">
 				<OIs COUNT="5"><tif:OI xmlns:tif="http://www.tourinfrance.net/Tourinfrance3/" xmlns:fmp="http://www.filemaker.com/fmpdsoresult" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:sy="http://purl.org/rss/1.0/modules/syndication/" xmlns="http://www.tourinfrance.net/Tourinfrance3/">
   <tif:DublinCore>
-    <dc:title xml:lang="FR">Le Belle Rive</dc:title>
+    <dc:title>Le Belle Rive</dc:title>
     <dc:identifier>TFO17142937971</dc:identifier>
     <tif:Classification code="02.01.05">H&#xF4;tellerie</tif:Classification>
 

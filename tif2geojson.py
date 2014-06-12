@@ -87,7 +87,11 @@ class Converter(object):
         }
 
     def _parse_property_title(self, entry):
-        return _deep_value(entry, 'tif:DublinCore', 'dc:title').get('#text')
+        title = _deep_value(entry, 'tif:DublinCore', 'dc:title')
+        if isinstance(title, dict):
+            # If has attribute like xml:lang
+            title = title.get('#text')
+        return title
 
     def _parse_property_description(self, entry):
         descriptions = _deep_value_list(entry, 'tif:DublinCore', 'dc:description',
