@@ -19,7 +19,7 @@ history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 setup(
     name='tif2geojson',
-    version='0.1.3.dev0',
+    version='0.1.3',
     description='Converts TourInFrance XML format to GeoJSON',
     long_description=readme + '\n\n' + history,
     author='Makina Corpus',

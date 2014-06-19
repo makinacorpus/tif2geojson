@@ -3,7 +3,7 @@
 History
 -------
 
-0.1.3 (unreleased)
+0.1.3 (2014-06-19)
 ++++++++++++++++++
 
 * Add a number of safety checks if TIF malformed
