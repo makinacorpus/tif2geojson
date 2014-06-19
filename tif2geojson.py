@@ -33,7 +33,9 @@ class Converter(object):
             parsed = xmltodict.parse(self.content)
         except ExpatError:
             parsed = dict()
-        entries = _deep_value_list(parsed, 'listeOI', 'OIs', 'tif:OI')
+        entries = _deep_value_list(parsed, 'listeOI',
+                                           'OIs',
+                                           'tif:OI')
         features = []
         for entry in entries:
             feature = self._parse_entry(entry)
@@ -41,7 +43,8 @@ class Converter(object):
         return features
 
     def _parse_entry(self, entry):
-        id_ = _deep_value(entry, 'tif:DublinCore', 'dc:identifier')
+        id_ = _deep_value(entry, 'tif:DublinCore',
+                                 'dc:identifier')
         geometry = self._parse_location(entry)
         properties = self._parse_properties(entry)
         return geojson.Feature(id=id_,
@@ -63,9 +66,9 @@ class Converter(object):
                                            'tif:DetailCoordonnees')
             if 'tif:Latitude' not in coords:
                 continue
-            lat = float(coords['tif:Latitude'])
-            lng = float(coords['tif:Longitude'])
-            altitude = float(coords['tif:Altitude'])
+            lat = float(coords.get('tif:Latitude', 0))
+            lng = float(coords.get('tif:Longitude', 0))
+            altitude = float(coords.get('tif:Altitude', 0))
             coords = [lng, lat, altitude]
             return geojson.Point(coords)
 
@@ -80,7 +83,8 @@ class Converter(object):
         return properties
 
     def _parse_property_category(self, entry):
-        category = _deep_value(entry, 'tif:DublinCore', 'tif:Classification')
+        category = _deep_value(entry, 'tif:DublinCore',
+                                      'tif:Classification')
         return {
             'id': category.get('@code'),
             'label': category.get('#text')
@@ -94,15 +98,17 @@ class Converter(object):
         return title
 
     def _parse_property_description(self, entry):
-        descriptions = _deep_value_list(entry, 'tif:DublinCore', 'dc:description',
-                                        default=[])
+        descriptions = _deep_value_list(entry, 'tif:DublinCore',
+                                               'dc:description',
+                                               default=[])
         for description in descriptions:
             desc_language = description.get('@xml:lang', '').lower()
             if self.lang.lower().startswith(desc_language):
                 return description.get('#text')
 
     def _parse_communication_media(self, entry, contact_type=None):
-        contacts = _deep_value_list(entry, 'tif:Contacts', 'tif:DetailContact')
+        contacts = _deep_value_list(entry, 'tif:Contacts',
+                                           'tif:DetailContact')
 
         for contact in contacts:
             if contact and contact.get("@type") != contact_type:
@@ -112,9 +118,8 @@ class Converter(object):
                                                  'tif:DetailAdresse')
             for address in adresses:
                 if address:
-                    persons = _deep_value_list(address,
-                                              'tif:Personnes',
-                                              'tif:DetailPersonne')
+                    persons = _deep_value_list(address, 'tif:Personnes',
+                                                        'tif:DetailPersonne')
                     for person in persons:
                         media = _deep_value(person, 'tif:MoyensCommunications',
                                                     'tif:DetailMoyenCom')
@@ -125,28 +130,30 @@ class Converter(object):
         media = self._parse_communication_media(entry,
                                                 contact_type=CODE_MAIN_CONTACT)
         for medium in media:
-            if medium['@type'] == CODE_WEBSITE:
+            is_website = (isinstance(medium, dict) and
+                          medium.get('@type') == CODE_WEBSITE)
+            if is_website:
                 return medium.get('tif:Coord')
 
     def _parse_property_phone(self, entry):
         media = self._parse_communication_media(entry,
                                                 contact_type=CODE_MAIN_CONTACT)
         for medium in media:
-            if medium['@type'] == CODE_PHONE:
+            if isinstance(medium, dict) and medium.get('@type') == CODE_PHONE:
                 return medium.get('tif:Coord')
 
     def _parse_property_pictures(self, entry):
         multimedia = _deep_value_list(entry, 'tif:Multimedia',
                                              'tif:DetailMultimedia')
-        pictures =  []
-        for multimedium in multimedia:
-            if multimedium['@type'] == CODE_IMAGE:
-                url = multimedium.get('tif:URL')
+        pictures = []
+        for medium in multimedia:
+            if isinstance(medium, dict) and medium.get('@type') == CODE_IMAGE:
+                url = medium.get('tif:URL')
                 if not url:
                     continue
                 picture = {
                     'url': url,
-                    'copyright': multimedium.get('tif:Copyright', '')
+                    'copyright': medium.get('tif:Copyright', '')
                 }
                 pictures.append(picture)
         return pictures

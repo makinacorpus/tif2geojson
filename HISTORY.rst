@@ -6,8 +6,7 @@ History
 0.1.3 (unreleased)
 ++++++++++++++++++
 
-- Nothing changed yet.
-
+* Add a number of safety checks if TIF malformed
 
 0.1.2 (2014-06-12)
 ++++++++++++++++++
